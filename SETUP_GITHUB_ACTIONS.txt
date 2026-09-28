@@ -1,5 +1,0 @@
-1. workflow/update.yml 내용을 GitHub 저장소의 .github/workflows/update.yml 로 이동합니다.
-2. Settings > Secrets and variables > Actions > New repository secret
-3. DART_API_KEY 를 추가합니다.
-4. Settings > Pages > Source = GitHub Actions
-5. Actions > DART Financial Agent > Run workflow
