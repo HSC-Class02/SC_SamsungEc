@@ -41,5 +41,29 @@ const annual=all.filter(r=>r.period_type==="annual").sort((a,b)=>a.year-b.year);
 new Chart(document.getElementById("trend"),{type:"line",data:{labels:annual.map(r=>r.year),datasets:[{label:"매출액",data:annual.map(r=>r.revenue),borderColor:"#315efb",backgroundColor:"#315efb",tension:.25},{label:"영업이익",data:annual.map(r=>r.operating_profit),borderColor:"#12a594",backgroundColor:"#12a594",tension:.25}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"bottom"}},scales:{y:{ticks:{callback:v=>Intl.NumberFormat("ko-KR",{notation:"compact"}).format(v)}}}}});
 new Chart(document.getElementById("margin"),{type:"line",data:{labels:annual.map(r=>r.year),datasets:[{label:"영업이익률",data:annual.map(r=>r.operating_margin_pct),borderColor:"#315efb",tension:.25},{label:"순이익률",data:annual.map(r=>r.net_margin_pct),borderColor:"#f59e0b",tension:.25}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom"}},scales:{y:{ticks:{callback:v=>v+"%"}}}}});renderTable("annual")}
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderTable(b.dataset.type)}));
-fetch("./data.json").then(r=>r.ok?r.json():[]).then(d=>{all=Array.isArray(d)?d:[];render()}).catch(()=>{document.getElementById("kpis").innerHTML='<div class="card">데이터가 아직 없습니다. GitHub Actions에서 워크플로를 실행하고 DART_API_KEY를 설정하세요.</div>';document.getElementById("tables").textContent="수집된 데이터가 없습니다."});
-</script></body></html>
+fetch("./data.json")
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(
+        `data.json 요청 실패: HTTP ${response.status}`
+      );
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("불러온 데이터:", data);
+    console.log("데이터 개수:", Array.isArray(data) ? data.length : "배열 아님");
+
+    all = Array.isArray(data) ? data : [];
+    render();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      document.getElementById("kpis").innerHTML =
+        '<div class="card">JSON 파일에 데이터가 없거나 배열 형식이 아닙니다.</div>';
+    }
+  })
+  .catch(error => {
+    console.error("대시보드 데이터 로딩 오류:", error);
+    document.getElementById("kpis").innerHTML =
+      `<div class="card">데이터 로딩 실패: ${error.message}</div>`;
+  });
